@@ -18,6 +18,7 @@ import {
   NProperty,
   VCARD,
 } from "vcard4";
+import { renderSVG } from 'uqr'
 import { ref, watchEffect } from 'vue'
 
 const fullname = ref('');
@@ -28,6 +29,18 @@ const company = ref('');
 const job = ref('');
 const qrcode = ref('');
 
+function downloadSVG() {
+  const svg = renderSVG(qrcode.value);
+  const svgBlob = new Blob([svg], {type:"image/svg+xml;charset=utf-8"});
+        const svgUrl = URL.createObjectURL(svgBlob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = 'vcard-qr';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+}
+
 watchEffect(() => {
   const fields = [];
   if(fullname.value !== "") {
@@ -36,7 +49,8 @@ watchEffect(() => {
   } 
 
   if(phone.value !== "") {
-    const cardPhone = new TelProperty([], new URIType(`tel:${phone.value}`));
+    //const cardPhone = new TelProperty([], new URIType(`tel:${phone.value}`));
+    const cardPhone = new TelProperty([], new TextType(`${phone.value}`));
     fields.push(cardPhone);
   }
 
@@ -69,6 +83,8 @@ watchEffect(() => {
     }
     const card = new VCARD(fields);
     qrcode.value = card.repr();
+  } else {
+    qrcode.value = '';
   }
   
   
@@ -86,7 +102,6 @@ watchEffect(() => {
     <input v-model="company" placeholder="company Name">
     <input v-model="job" placeholder="Job Title">
   </div>
-
   <QRCodeVue3 :value="qrcode" 
   :width="200"
   :height="200"
@@ -103,9 +118,10 @@ watchEffect(() => {
   :cornersDotOptions="{ type: undefined, color: '#000000' }"
   fileExt="png"
   :download="true"
-  downloadButton="my-button"
+  downloadButton="download"
   :downloadOptions="{ name: 'vcard-qr', extension: 'png' }"
   />
+  <button class="download" @click="downloadSVG" v-if="qrcode !== ''">Download SVG</button>
 </template>
 
 <style scoped>
@@ -114,5 +130,8 @@ watchEffect(() => {
   flex-direction: column;
   gap: 18px;
   margin-bottom: 20px;
+}
+.download {
+  margin-top: 20px;
 }
 </style>

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "qrcode-vue3": "^1.6.8",
+    "uqr": "^0.1.2",
     "vcard4": "^3.1.5",
     "vue": "^3.3.4"
   },
